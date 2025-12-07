@@ -11,14 +11,26 @@ class TickerScreenViewModel(
     private val numbersRepository: INumbersRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(0)
-    val uiState : StateFlow<Int> = _uiState
+    private val _uiState = MutableStateFlow(TickerUiState())
+    val uiState : StateFlow<TickerUiState> = _uiState
 
     init {
         viewModelScope.launch {
             numbersRepository.getNumbers().collect {
-                _uiState.value = it
+                _uiState.value = _uiState.value.copy(counterValue = it)
             }
         }
     }
+
+    fun incrementCounter() {
+        _uiState.value = _uiState.value.copy(clicksCounter = _uiState.value.clicksCounter + 1)
+    }
+
 }
+
+data class TickerUiState(
+    val counterValue: Int = 0,
+    val clicksCounter: Int = 0,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+)
